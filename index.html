@@ -1,0 +1,772 @@
+<html>
+
+<head>
+	<title>Eunomia1738</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="manifest" href="/manifest.json">
+	<link rel="icon" type="image/x-icon" href="./Media/Content/logo.png">
+	<!-- ! User Interface Theming/CSS -->
+	<link rel="stylesheet" type="text/css" href="./Media/Skins/Default/ui.css">
+	<link rel="stylesheet" href="./Media/Icons/all.min.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Noto Sans:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+		rel="stylesheet">
+</head>
+
+<body id="body">
+	<!-- ! Client Container -->
+	<div id="client-container" class="w-full">
+		<!-- 
+			! God's Canvas 
+		-->
+		<div id="client-canvas-container">
+			<canvas id="canvas" name="canvas" class="shadow-md rounded-md m-1"> </canvas>
+		</div>
+		<!-- 
+			! Connection Window 
+		-->
+		<div id="connect" name="connect" style="display:block;position:absolute;"
+			class="rounded-lg shadow-lg min-w-[420px] scale-center">
+			<div id="connect-move"
+				class="w-full row-start-1 col-span-2 rounded-tl-md cursor-move hidden lg:inline-block"
+				style="height:30px;background:linear-gradient(90deg, var(--client-color-3), #00000000)">
+
+				<div class="px-2 font-[200] text-sm" style="display: block;margin-top: 6px;">
+					Visit a Palace!
+					<span class="close-window-btn" onclick="toggleDivIdVisibility('connect');"><i
+							class="fa-solid fa-circle-xmark"></i></span>
+				</div>
+			</div>
+			<div class="grid grid-cols-[auto_80px] gap-2 grid-rows-[auto_auto] p-2">
+				<div class="col-start-1 row-start-1">
+					<input placeholder="Username"
+						class="shadow appearance-none rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cl3"
+						id="userName" name="userName" type="text">
+				</div>
+				<div class="col-start-1 row-start-2">
+					<input placeholder="Server Address"
+						class="shadow appearance-none rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline cl3"
+						id="serverAddress" name="serverAddress" type="text" value="chat.epalaces.com:7777">
+				</div>
+				<div class="col-start-2 row-start-1 row-span-2">
+					<button style="height:100%" class="bg-white hover:bg-gray-100 font-[500] py-1 px-2 rounded shadow"
+						id="connect" name="connect" onclick="Connect(); return false;" value="Connect">Connect
+						<i class="fa-solid fa-plug !block"></i></button>
+				</div>
+			</div>
+		</div>
+		<!-- 
+			! Log Window 
+			? (also see protocol.js) 
+		-->
+		<div id="log" name="log" style="display:block;position:absolute;" class="scale-center">
+			<div id="log-move" class="w-full row-start-1 col-span-2 rounded-tl-md cursor-move hidden lg:inline-block"
+				style="height:30px;background:linear-gradient(90deg, var(--client-color-3), #00000000)">
+
+				<div class="px-2 font-[200] text-sm" style="display: block;margin-top: 6px;">
+					Log
+					<span class="close-window-btn" onclick="toggleDivIdVisibility('log');"><i
+							class="fa-solid fa-circle-xmark"></i></span>
+				</div>
+			</div>
+			<div id="client-chat-log"></div>
+		</div>
+		<!-- 
+			! Users Window
+			? (also see ui.js)
+		 -->
+		<div id="users" name="users" style="display:block;position:absolute;" class="slide-bottom">
+			<div id="users-move" class="w-full row-start-1 col-span-2 rounded-tl-md cursor-move hidden lg:inline-block"
+				style="height:30px;background:linear-gradient(90deg, var(--client-color-3), #00000000)">
+				<div class="px-2 font-[200] text-sm" style="display: block;margin-top: 6px;">
+					People
+					<span class="close-window-btn" onclick="toggleDivIdVisibility('users');"><i
+							class="fa-solid fa-circle-xmark"></i></span>
+				</div>
+			</div>
+			<div class="list-parent">
+				<div id="client-user-list">
+					<h3 class="m-1">Not Connected</h3>
+					<p class="indent-2">Please connect to a server.</p>
+				</div>
+			</div>
+
+			<div class="grid mt-1 p-2" style="grid-template-columns: 1fr 177px;">
+				<div class="flex-btns">
+					<button id="requestUsers" name="requestUsers" onclick="RequestUserList(); return false;"
+						class="hover:opacity-80 py-1 px-2 mt-1 text-right rounded shadow cl3 font-[500] text-neutral-200"
+						value="Refresh">Refresh</button>
+					<button id="mostPopularRoom" name="mostPopularRoom"
+						class="hover:opacity-80 py-1 px-2 mt-1 text-right rounded shadow cl3 font-[500] text-neutral-200"
+						value="Most Popular">Most Populated</button>
+				</div>
+				<div>
+					<input type="text" id="userFilter" placeholder="Filter" style="width:fit-content;"
+						class="bg-[--client-color-1] shadow appearance-none rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline">
+				</div>
+			</div>
+		</div>
+		<!-- 
+			! Rooms Window
+			? (also see ui.js) 
+		-->
+		<div id="rooms" name="rooms" style="display:block;position:absolute;" class="slide-bottom">
+			<div id="rooms-move" class="w-full row-start-1 col-span-2 rounded-tl-md cursor-move hidden lg:inline-block"
+				style="height:30px;background:linear-gradient(90deg, var(--client-color-3), #00000000)">
+				<div class="px-2 font-[200] text-sm" style="display: block;margin-top: 6px;">
+					Rooms
+					<span class="close-window-btn" onclick="toggleDivIdVisibility('rooms');"><i
+							class="fa-solid fa-circle-xmark"></i></span>
+				</div>
+			</div>
+			<div class="list-parent">
+				<div id="client-room-list">
+					<h3 class="m-1">Not Connected</h3>
+					<p class="indent-2">Please connect to a server.</p>
+				</div>
+			</div>
+			<div class="grid grid-cols-[75px_auto] mt-1 p-2">
+				<div>
+					<button id="requestUsers" name="requestUsers" onclick="RequestRoomList(); return false;"
+						class="hover:opacity-80 py-1 px-2 mt-1 text-right rounded shadow cl3 font-[500] text-neutral-200"
+						value="Refresh">Refresh</button>
+				</div>
+				<div class="place-self-end">
+					<input type="text" id="roomFilter" placeholder="Filter"
+						class="bg-[--client-color-1] shadow appearance-none rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline">
+				</div>
+			</div>
+		</div>
+		<!-- 
+			! Chat Window 
+			? (MOBILE ONLY) 
+		-->
+		<div id="chat" style="display:block;position:absolute;" class="p-2 rounded-lg shadow-lg lg:w-[420px] w-[80vw]">
+			<div id="chat-move">
+				<input id="speekMsgMobile" name="speekMsgMobile" type="text" placeholder="Yo what's up peeps!"
+					class="bg-[--client-color-1] w-[calc(100%-55px)] shadow appearance-none rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline h-[48px]">
+				<button id="speakMobile" name="speakMobile"
+					onclick="DoXTalk(speekMsgMobile.value);Id('speekMsgMobile').value=''; return false;"
+					class="font-semibold py-2.5 px-3 rounded shadow !bg-transparent h-[48px]">
+					<i class="fa-solid fa-paper-plane"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+	<!-- 
+		! Preferences Window
+		? (also see ui.js)
+	-->
+	<div id="prefs" name="prefs" style="display:block;position:absolute;" class="slide-bottom">
+		<div id="prefs-move" class="w-full row-start-1 col-span-2 rounded-tl-md cursor-move hidden lg:inline-block"
+			style="height:30px;background:linear-gradient(90deg, var(--client-color-3), #00000000)">
+
+			<div class="px-2 font-[200] text-sm" style="display: block;margin-top: 6px;">
+				Preferences
+				<span class="close-window-btn" onclick="toggleDivIdVisibility('prefs');"><i
+						class="fa-solid fa-circle-xmark"></i></span>
+			</div>
+		</div>
+		<div id="client-prefs-box">Say <b>~help</b> and look in log</div>
+	</div>
+	<!-- 
+		! Prop Bag Window
+		? (also see ui.js)
+	 -->
+	<div id="props" name="props" style="display:block;position:absolute;" class="slide-bottom">
+		<div id="props-move" class="w-full row-start-1 col-span-2 rounded-tl-md cursor-move hidden lg:inline-block"
+			style="height:30px;background:linear-gradient(90deg, var(--client-color-3), #00000000)">
+
+			<div class="px-2 font-[200] text-sm" style="display: block;margin-top: 6px;">
+				Prop Bag
+				<span class="close-window-btn" onclick="toggleDivIdVisibility('props');"><i
+						class="fa-solid fa-circle-xmark"></i></span>
+			</div>
+		</div>
+		<div id="client-props-box">
+
+			<div id="prop-bag-container" class="grid grid-cols-[100px_auto] gap-2">
+				<div>
+					<button id="wear-button" class="prop-btn"><i class="fa-solid fa-shirt icon"></i></button>
+
+					<input type="file" id="file-input" accept="image/*" style="display: none;" />
+					<button id="upload-button" class="prop-btn"><i class="fa-regular fa-images icon"></i></button>
+
+					<button id="delete-button" class="prop-btn trash"><i
+							class="fa-solid fa-trash-can icon"></i></button>
+				</div>
+
+				<div id="prop-bag">
+					<!-- items will be generated here -->
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- 
+		! MOBILE Tray 
+		? (single column right-side navbar)
+	 -->
+	<div id="client-icon-tray-m"
+		class="grid grid-cols-1 h-full gap-2 px-1 place-content-stretch py-1 lg:py-3 lg:hidden right-0">
+		<div class="col-start-1 col-span-1">
+			<div class="grid grid-cols-1 h-full place-content-center gap-1">
+				<button id="connect-btn-m" class="butt-m cl1-font">
+					<i class="fa-solid fa-plug"></i>
+				</button>
+				<button id="users-btn-m" class="butt-m cl1-font">
+					<i class="fa-solid fa-user-group"></i>
+				</button>
+				<button id="rooms-btn-m" class="butt-m cl1-font">
+					<i class="fa-solid fa-people-roof"></i>
+				</button>
+				<button id="props-btn-m" class="butt-m cl1-font">
+					<i class="fa-solid fa-briefcase"></i>
+				</button>
+				<button id="log-btn-m" class="butt-m cl1-font">
+					<i class="fa-regular fa-clipboard"></i>
+				</button>
+				<button id="chat-btn-m" class="butt-m cl1-font">
+					<i class="fa-regular fa-keyboard"></i>
+				</button>
+				<button id="prefs-btn-m" class="butt-m cl1-font">
+					<i class="fa-solid fa-gears"></i>
+				</button>
+			</div>
+		</div>
+		<div class="w-full client-theme-toggle lg:col-start-3 col-span-1 place-self-end">
+			<div class="w-full grid grid-cols-1 gap-1">
+				<div class="theme-switch-wrapper place-self-end">
+					<label class="theme-switch" for="theme-checkbox">
+						<input type="checkbox" id="theme-checkbox">
+						<i class="fa-solid fa-moon" id="toggle-icon"></i>
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 
+		! Desktop Tray 
+		? (three column bottom navbar)
+	-->
+	<div id="client-icon-tray" class="lg:grid grid-cols-[auto_1fr_auto] w-full gap-2 px-1 py-1 lg:py-3 hidden">
+		<!-- 
+			! Desktop Left Side Buttons 
+		-->
+		<div class="col-start-1 col-span-1">
+			<div class="grid grid-cols-[auto_auto] h-full place-content-center gap-1 mx-5 ml-8">
+				<div>
+					<button id="connect-btn" class="butt cl1-font">
+						<i class="fa-solid fa-plug"></i>
+					</button>
+					<button id="users-btn" class="butt cl1-font">
+						<i class="fa-solid fa-user-group"></i>
+					</button>
+					<button id="rooms-btn" class="butt cl1-font">
+						<i class="fa-solid fa-people-roof"></i>
+					</button>
+					<button id="props-btn" class="butt cl1-font">
+						<i class="fa-solid fa-briefcase"></i>
+					</button>
+					<button id="log-btn" class="butt cl1-font">
+						<i class="fa-regular fa-clipboard"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+		<!-- 
+			! Desktop Chat Text Input & Prop Bag
+		-->
+		<div class="lg:col-start-2 col-span-1 w-full place-self-center">
+
+			<div>
+				<input id="speekMsg" name="speekMsg" type="text" placeholder="Yo what's up peeps!"
+					class="bg-[--client-color-1] w-[calc(100%-55px)] shadow appearance-none rounded py-2 px-3 leading-tight focus:outline-none focus:shadow-outline h-[48px]">
+				<button id="speak" name="speak" onclick="DoXTalk(speekMsg.value);Id('speekMsg').value=''; return false;"
+					class="font-semibold py-2.5 px-3 !bg-transparent h-[48px]">
+					<i class="fa-solid fa-paper-plane"></i>
+				</button>
+			</div>
+
+		</div>
+		<!-- 
+			! Desktop Right Side Status Box & Dark Mode Toggle 
+		-->
+		<div class="w-full lg:col-start-3 col-span-1 place-self-end">
+			<div class="w-full grid grid-cols-[2fr_48px_auto]">
+				<!-- 
+					? Session Info Box 
+				-->
+				<div class="session-info-box w-full py-1 px-3 text-sm rounded-md shadow-sm place-self-start">
+					<div class="w-full" type="textStatus" id="textStatus" name="textStatus">Awaiting connection...
+					</div>
+					<div class="w-full" type="textUserCount" id="textUserCount" name="textCount">People: 0/0</div>
+				</div>
+
+				<button id="prefs-btn" class="butt cl1-font mx-2">
+					<i class="fa-solid fa-gears"></i>
+				</button>
+
+				<!-- 
+					? Dark Mode Toggle 
+				-->
+				<div class="theme-switch-wrapper place-self-end mx-2 ml-4">
+					<label class="theme-switch" for="theme-checkbox">
+						<input type="checkbox" id="theme-checkbox">
+						<i class="fa-solid fa-moon" id="toggle-icon"></i>
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!--[if lt IE 8]>
+		<script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE8.js"></script>
+		<![endif]-->
+
+	<!--[if lt IE 8]>
+		<script src="http://documentcloud.github.io/underscore/underscore-min.js"></script>
+		<![endif]-->
+
+	<script type="text/javascript" src="Frameworks/util.js"></script>
+	<script type="text/javascript" src="Frameworks/base64.js"></script>
+	<script type="text/javascript" src="Frameworks/websock.js"></script>
+	<!-- ><script type="text/javascript" src="Frameworks/jquery.js"></script> -->
+	<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script> -->
+
+
+	<script type="text/javascript" src="Libraries/helpers.js"></script>
+	<script type="text/javascript" src="Libraries/ui.events.js"></script>
+	<script type="text/javascript" src="Libraries/ui.js"></script>
+	<script type="text/javascript" src="Libraries/timers.js"></script>
+	<script type="text/javascript" src="Libraries/bubbles.js"></script>
+	<script type="text/javascript" src="Libraries/storage.js"></script>
+	<script type="text/javascript" src="Libraries/environment.js"></script>
+	<script type="text/javascript" src="Libraries/commands.js"></script>
+	<script type="text/javascript" src="Libraries/propbag.js"></script>
+
+
+	<script type="text/javascript" src="Libraries/Palace/events.js"></script>
+	<script type="text/javascript" src="Libraries/Palace/registration.js"></script>
+	<script type="text/javascript" src="Libraries/Palace/encryption.js"></script>
+	<script type="text/javascript" src="Libraries/Palace/protocol.js"></script>
+	<script type="text/javascript" src="Libraries/Palace/props.js"></script>
+
+	<script lang="javascript">
+		"use strict";
+
+		function getMaxZIndex() {
+			var allElements = document.getElementsByTagName("*");
+			var maxZIndex = 0;
+
+			for (var i = 0; i < allElements.length; i++) {
+				var zIndex = document.defaultView.getComputedStyle(allElements[i], null).getPropertyValue("z-index");
+				if (!isNaN(zIndex) && zIndex > maxZIndex) {
+					maxZIndex = zIndex;
+				}
+			}
+
+			return maxZIndex;
+		}
+
+		function setup_window(id) {
+			var mousePosition;
+			var offset = [0, 0];
+			var isDown = false;
+			var dragTimer;
+			var div = Id(id);
+			var divMove = Id(id + "-move");
+
+
+			div.addEventListener('mousedown', function (e) {
+				if (currentMaxZIndex >= maxZIndexValue) {
+					currentMaxZIndex = 1;
+				} else {
+					currentMaxZIndex++;
+				}
+				div.style.zIndex = currentMaxZIndex;
+			}, true);
+
+			divMove.addEventListener('mousedown', function (e) {
+
+				dragTimer = setTimeout(function () {
+					isDown = true;
+					offset = [
+						div.offsetLeft - e.clientX,
+						div.offsetTop - e.clientY
+					];
+				}, 50);
+			}, true);
+
+			document.addEventListener('mouseup', function () {
+				if (dragTimer) {
+					clearTimeout(dragTimer);
+				}
+				isDown = false;
+			}, true);
+
+			document.addEventListener('mousemove', function (event) {
+				if (isDown) {
+					mousePosition = {
+						x: event.clientX,
+						y: event.clientY
+					};
+					div.style.left = (mousePosition.x + offset[0]) + 'px';
+					div.style.top = (mousePosition.y + offset[1]) + 'px';
+					event.preventDefault();
+				}
+			}, true);
+
+			function repositionWithinViewport() {
+				const rect = div.getBoundingClientRect();
+				const viewportWidth = window.innerWidth;
+				const viewportHeight = window.innerHeight;
+
+				if (rect.left < 0) {
+					div.style.left = '0';
+				} else if (rect.right > viewportWidth) {
+					div.style.left = `${viewportWidth - rect.width}px`;
+				}
+				if (rect.top < 0) {
+					div.style.top = '0';
+				} else if (rect.bottom > viewportHeight) {
+					div.style.top = `${viewportHeight - rect.height}px`;
+				}
+			}
+
+			window.addEventListener('resize', () => {
+				repositionWithinViewport();
+			});
+		}
+
+
+
+		/* Test variables */
+		var moving = 0;
+		var speaking = 0;
+		var proxy = "chat.tonewebdesign.com:8080?remote=";
+		// var proxy = "localhost:9990";
+
+		var socket;
+
+		//protocol variables
+		var buffer = ""; /* Socket data */
+
+		load_config();
+
+		// load environment 
+		init_environment();
+
+		setup_window("connect");
+		setup_window("users");
+		setup_window("rooms");
+		setup_window("log");
+		setup_window("prefs");
+		setup_window("props");
+		setup_window("chat");
+
+
+		function Connect() {
+			var uri;
+			var previous_socket = socket;
+
+			var buffer = "";
+			var moving = 0;
+			var speaking = 0;
+
+			/*
+			websockify/websockify.py 9999 martyn.fpalace.com:9998
+			*/
+			save_config();
+
+			UpdateStatus("Connecting to " + gs_server);
+			uri = 'ws://' + proxy + gs_server;
+			/*
+			uri = 'ws://' + proxy + ""; //"/?url=" + gs_server;
+			*/
+			socket = new Websock()
+
+			Disconnect();
+			socket.close();
+
+			socket.open(uri, 'binary');
+
+			socket.on('open', function () {
+				buffer = "";
+				UpdateStatus("Connected");
+				const ge_connect_button = document.querySelector('#connect-btn');
+				const ge_connect_button_m = document.querySelector('#connect-btn-m');
+				const ge_connect_div = document.querySelector('#connect');
+
+				toggleDivVisibility(ge_connect_div);
+				toggleButtonColor(ge_connect_button_m, ge_connect_div);
+				toggleButtonColor(ge_connect_button, ge_connect_div);
+			});
+
+			socket.on('message', function () {
+				if (previous_socket) {
+					debug("Closing previous socket\r\n");
+					previous_socket.close(); // close already started socket 
+					previous_socket = null;
+				}
+
+				bufferData(socket.rQshiftStr());
+			});
+
+			socket.on('error', function () {
+				buffer = "";
+				UpdateStatus("Disconnected");
+			});
+
+			socket.on('close', function () {
+				buffer = "";
+				UpdateStatus("Disconnected");
+			});
+		}
+
+
+		function sendData(data) {
+			var str = "";
+			for (var i = 0; i < data.length; i++) {
+				str += String.fromCharCode(data[i]);
+			}
+			///debug(" > Out:=" + AscToHex(str));
+
+			// try block fixed error for toggling buttons if not connected lol
+			try {
+				socket.send_string(str);
+
+			} catch (e) {
+				debug("Error sending data: " + e);
+			}
+		}
+
+
+		function bufferData(data) {
+			var packet = '';
+			// buffer bytes are global
+			buffer += data;
+
+			// check we have a valid header 
+			if (buffer.length < 12) {
+				return; //not enough bytes
+			}
+
+			// loop bytes until empty
+			while (buffer.length) {
+				// locally store buffer bytes 
+				var tmp = buffer;
+
+				// get(...) routines remove bytes from buffer
+				var msgName = getLong();
+				var msgLen = getLong();
+				var msgIdent = getLong();
+
+				// not enough bytes for packet length
+				if (buffer.length < msgLen) {
+					buffer = tmp;
+					return; //not enough data
+				}
+
+				// packet doesn't contain payload
+				if (msgLen > 0) {
+					packet = getStr(msgLen);
+				} else {
+					packet = "";
+				}
+
+				if (1 == 0) {
+					//debug( "\r\n\r\n" );
+					//debug( " < In:=" + AscToHex( tmp.substr(0, 12 + msgLen ) )  );
+				}
+
+				tmp = buffer; // temporary store next bytes 
+				buffer = packet; // current packet processed in buffer
+
+				switch (msgName) {
+					case MSG_TIYID: {
+						//debug( " Prot   = This is my ID " + msgIdent + "\r\n\r\n" ) ;
+						gi_user_id = msgIdent;
+						Registration(socket);
+					}
+					break;
+
+				case MSG_PING: //70696e67  676e6970
+				{
+					//debug( " Prot   = Ping\r\n\r\n" ) ;
+					Pong(socket);
+				}
+				break;
+
+				case MSG_TALK: {
+					//debug( " Prot   = Talk\r\n\r\n" ) ;
+					Talk();
+				}
+				break;
+
+				case MSG_XTALK: {
+					//debug( " Prot   = XTalk\r\n\r\n" ) ;
+					XTalk(msgIdent);
+				}
+				break;
+
+				case MSG_HTTPSERVER: {
+					//debug( " Prot   = HTTP Server\r\n\r\n" ) ;
+					HTTPServer();
+				}
+				break;
+
+				case MSG_USERLIST: {
+					//debug( " Prot   = Users in Room\r\n\r\n" ) ;
+					UserList(msgIdent);
+				}
+				break;
+
+				case MSG_LISTOFALLUSERS: {
+					//debug( " Prot   = User List\r\n\r\n" ) ;
+					UserListAll(msgIdent);
+				}
+				break;
+
+				case MSG_LISTOFALLROOMS: {
+					//debug( " Prot   = Room List\r\n\r\n" ) ;
+					RoomsListAll(msgIdent);
+				}
+				break;
+
+				case MSG_USERNEW: {
+					//debug( " Prot   = User New\r\n\r\n" ) ;
+					UserEnter();
+				}
+				break;
+
+				case MSG_ROOMDESC: {
+					//debug( " Prot   = Room Description\r\n\r\n" ) ;
+					RoomDesc();
+				}
+				break;
+
+				case MSG_USEREXIT: {
+					//debug( " Prot   = User Exit\r\n\r\n" ) ;
+					UserExit(msgIdent);
+				}
+				break;
+
+				case MSG_LOGOFF: {
+					//	debug( " Prot   = User Logoff\r\n\r\n" ) ;
+					UserExit(msgIdent);
+					UserLogoff();
+				}
+				break;
+
+				case MSG_USERLOG: {
+					//	debug( " Prot   = User Logon\r\n\r\n" ) ;
+					UserLogon();
+				}
+				break;
+
+				case MSG_SERVERINFO: {
+					//debug( " Prot   = Server Info\r\n\r\n" ) ;
+					ServerInfo();
+				}
+				break;
+
+				case MSG_USERMOVE: {
+					UserMove(msgIdent);
+				}
+				break;
+
+				case MSG_ROOMDESCEND: {
+					//if user / room list not loaded then request it 
+					if (ga_user_list.length == 0) {
+						RequestUserList();
+					}
+
+					if (ga_room_list.length == 0) {
+						RequestRoomList();
+					}
+				}
+				break;
+
+				case MSG_USERSTATUS: {
+					// TODO add user status (wiz/god etc.. not sure what for?)
+
+				}
+				case MSG_VERSION:
+				case MSG_ALTLOGONREPLY:
+					// ignore
+					break;
+
+				default: {
+					debug(" Name    = " + msgName);
+					debug(" Length  = " + msgLen);
+					debug(" IDent   = " + msgIdent);
+					debug(" Name   = \"" + HexToAsc(NumToHex(msgName)) + "\" 0x" + NumToHex(msgName) + " '" + msgName + "'");
+					debug(" Ignoring...\r\n\r\n");
+				}
+				break;
+				}
+
+				// push remaining bytes back into buffer
+				buffer = tmp;
+			}
+		}
+
+
+
+		function enterFullscreen() {
+			const clientContainer = Id("body");
+
+			if (clientContainer.requestFullscreen) {
+				clientContainer.requestFullscreen();
+			} else if (clientContainer.mozRequestFullScreen) { // Firefox
+				clientContainer.mozRequestFullScreen();
+			} else if (clientContainer.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+				clientContainer.webkitRequestFullscreen();
+			} else if (clientContainer.msRequestFullscreen) { // IE/Edge
+				clientContainer.msRequestFullscreen();
+			}
+
+			clientContainer.style.height = window.innerHeight + "px";
+
+			setTimeout(() => {
+				window.scrollTo(0, 1);
+			}, 100);
+		}
+
+		function resizeSideNav() {
+			const element = Id("client-icon-tray-m");
+			element.style.height = window.innerHeight + 'px';
+			element.style.right = '0';
+			element.style.float = 'right';
+		}
+
+		function onViewportChange() {
+			if (window.innerWidth <= 1023) {
+				resizeSideNav();
+				document.body.addEventListener("click", onUserInteraction);
+				document.body.addEventListener("touchstart", onUserInteraction);
+			} else {
+				document.body.removeEventListener("click", onUserInteraction);
+				document.body.removeEventListener("touchstart", onUserInteraction);
+			}
+		}
+
+		function onUserInteraction() {
+			enterFullscreen();
+			// document.body.removeEventListener("click", onUserInteraction);
+			// document.body.removeEventListener("touchstart", onUserInteraction);
+		}
+
+		window.addEventListener('load', onViewportChange);
+		window.addEventListener('resize', onViewportChange);
+		window.addEventListener('orientationchange', onViewportChange);
+	</script>
+
+</body>
+
+</html>

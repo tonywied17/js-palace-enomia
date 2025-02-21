@@ -1,0 +1,17 @@
+{
+    "name": "Project Eunomia",
+    "short_name": "Eunomia",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "landscape",
+    "background_color": "#303030",
+    "theme_color": "#303030",
+    "icons": [
+      {
+        "src": "./Media/Content/logo.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
+  
